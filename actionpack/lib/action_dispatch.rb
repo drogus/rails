@@ -47,6 +47,7 @@ module ActionDispatch
   end
 
   autoload_under 'middleware' do
+    autoload :OriginalPath
     autoload :RequestId
     autoload :BestStandardsSupport
     autoload :Callbacks
@@ -56,6 +57,7 @@ module ActionDispatch
     autoload :Flash
     autoload :Head
     autoload :ParamsParser
+    autoload :PublicExceptions
     autoload :Reloader
     autoload :RemoteIp
     autoload :Rescue
@@ -63,7 +65,6 @@ module ActionDispatch
     autoload :Static
   end
 
-  autoload :ClosedError, 'action_dispatch/middleware/closed_error'
   autoload :MiddlewareStack, 'action_dispatch/middleware/stack'
   autoload :Routing
 

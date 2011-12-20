@@ -1,5 +1,22 @@
 ## Rails 3.2.0 (unreleased) ##
 
+*   The ShowExceptions middleware now accepts a exceptions application that is responsible to render an exception when the application fails. The application is invoked with a copy of the exception in `env["action_dispatch.exception"]` and with the PATH_INFO rewritten to the status code. *José Valim*
+
+*   Add `button_tag` support to ActionView::Helpers::FormBuilder.
+
+    This support mimics the default behavior of `submit_tag`.
+
+    Example:
+
+        <%= form_for @post do |f| %>
+          <%= f.button %>
+        <% end %>
+
+*   Date helpers accept a new option, `:use_two_digit_numbers = true`, that renders select boxes for months and days with a leading zero without changing the respective values. 
+    For example, this is useful for displaying ISO8601-style dates such as '2011-08-01'. *Lennart Fridén and Kim Persson*
+
+*   Make ActiveSupport::Benchmarkable a default module for ActionController::Base, so the #benchmark method is once again available in the controller context like it used to be *DHH*
+
 *   Deprecated implied layout lookup in controllers whose parent had a explicit layout set:
 
         class ApplicationController
@@ -53,9 +70,9 @@
           <%= f.text_field :version %>
         <% end %>
 
-*   Refactor ActionDispatch::ShowExceptions. Controller is responsible for choice to show exceptions. *Sergey Nartimov*
+*   Refactor ActionDispatch::ShowExceptions. The controller is responsible for choosing to show exceptions when `consider_all_requests_local` is false.
 
-    It's possible to override +show_detailed_exceptions?+ in controllers to specify which requests should provide debugging information on errors.
+    It's possible to override `show_detailed_exceptions?` in controllers to specify which requests should provide debugging information on errors. The default value is now false, meaning local requests in production will no longer show the detailed exceptions page unless `show_detailed_exceptions?` is overridden and set to `request.local?`.
 
 *   Responders now return 204 No Content for API requests without a response body (as in the new scaffold) *José Valim*
 

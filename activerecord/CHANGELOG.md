@@ -1,5 +1,17 @@
 ## Rails 3.2.0 (unreleased) ##
 
+*   Added ability to run migrations only for given scope, which allows
+    to run migrations only from one engine (for example to revert changes
+    from engine that you want to remove).
+
+    Example:
+      rake db:migrate SCOPE=blog
+
+   *Piotr Sarnacki*
+
+*   Migrations copied from engines are now scoped with engine's name,
+    for example 01_create_posts.blog.rb. *Piotr Sarnacki*
+
 *   Implements `AR::Base.silence_auto_explain`. This method allows the user to
     selectively disable automatic EXPLAINs within a block. *fxn*
 
@@ -134,6 +146,10 @@
     during :reject_if => :all_blank (fixes #2937)
 
     *Aaron Christy*
+    
+*   Add ActiveSupport::Cache::NullStore for use in development and testing.
+
+    *Brian Durand*
 
 ## Rails 3.1.3 (unreleased) ##
 

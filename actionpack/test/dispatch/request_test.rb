@@ -618,6 +618,22 @@ class RequestTest < ActiveSupport::TestCase
     assert_equal "/authenticate?secret", path
   end
 
+  test "test original_path returns ORIGINAL_PATH" do
+    request = stub_request('ORIGINAL_PATH' => "/foo?bar")
+
+    path = request.original_path
+    assert_equal "/foo?bar", path
+  end
+
+  test "test original_url returns url built using ORIGINAL_PATH" do
+    request = stub_request('ORIGINAL_PATH'   => "/foo?bar",
+                           'HTTP_HOST'       => "example.org",
+                           'rack.url_scheme' => "http")
+
+    url = request.original_url
+    assert_equal "http://example.org/foo?bar", url
+  end
+
 protected
 
   def stub_request(env = {})

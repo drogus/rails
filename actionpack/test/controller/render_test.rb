@@ -25,6 +25,8 @@ end
 class TestController < ActionController::Base
   protect_from_forgery
 
+  before_filter :set_variable_for_layout
+
   class LabellingFormBuilder < ActionView::Helpers::FormBuilder
   end
 
@@ -41,7 +43,7 @@ class TestController < ActionController::Base
   end
 
   def hello_world_file
-    render :file => File.expand_path("../../fixtures/hello.html", __FILE__)
+    render :file => File.expand_path("../../fixtures/hello", __FILE__), :formats => [:html]
   end
 
   def conditional_hello
@@ -364,17 +366,14 @@ class TestController < ActionController::Base
   end
 
   def layout_test_with_different_layout
-    @variable_for_layout = nil
     render :action => "hello_world", :layout => "standard"
   end
 
   def layout_test_with_different_layout_and_string_action
-    @variable_for_layout = nil
     render "hello_world", :layout => "standard"
   end
 
   def layout_test_with_different_layout_and_symbol_action
-    @variable_for_layout = nil
     render :hello_world, :layout => "standard"
   end
 
@@ -383,7 +382,6 @@ class TestController < ActionController::Base
   end
 
   def layout_overriding_layout
-    @variable_for_layout = nil
     render :action => "hello_world", :layout => "standard"
   end
 
@@ -666,8 +664,11 @@ class TestController < ActionController::Base
 
   private
 
+    def set_variable_for_layout
+      @variable_for_layout = nil
+    end
+
     def determine_layout
-      @variable_for_layout ||= nil
       case action_name
         when "hello_world", "layout_test", "rendering_without_layout",
              "rendering_nothing_on_layout", "render_text_hello_world",
@@ -809,9 +810,7 @@ class RenderTest < ActionController::TestCase
   end
 
   def test_render_file
-    assert_deprecated do
-      get :hello_world_file
-    end
+    get :hello_world_file
     assert_equal "Hello world!", @response.body
   end
 
