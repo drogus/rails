@@ -82,16 +82,18 @@ module ActionView
   #
   # This will render the partial "advertisement/_ad.html.erb" regardless of which controller this is being called from.
   #
-  # == Rendering objects with the RecordIdentifier
+  # == Rendering objects that respond to `to_partial_path`
   #
-  # Instead of explicitly naming the location of a partial, you can also let the RecordIdentifier do the work if
-  # you're following its conventions for RecordIdentifier#partial_path. Examples:
+  # Instead of explicitly naming the location of a partial, you can also let PartialRenderer do the work
+  # and pick the proper path by checking `to_proper_path` method. If the object passed to render is a collection,
+  # all objects must return the same path.
   #
-  #  # @account is an Account instance, so it uses the RecordIdentifier to replace
+  #  # @account.to_partial_path returns 'accounts/account', so it can be used to replace:
   #  # <%= render :partial => "accounts/account", :locals => { :account => @account} %>
   #  <%= render :partial => @account %>
   #
-  #  # @posts is an array of Post instances, so it uses the RecordIdentifier to replace
+  #  # @posts is an array of Post instances, so every post record returns 'posts/post' on `to_partial_path`,
+  #  # that's why we can replace:
   #  # <%= render :partial => "posts/post", :collection => @posts %>
   #  <%= render :partial => @posts %>
   #
@@ -106,13 +108,14 @@ module ActionView
   #  # Instead of <%= render :partial => "account", :locals => { :account => @buyer } %>
   #  <%= render "account", :account => @buyer %>
   #
-  #  # @account is an Account instance, so it uses the RecordIdentifier to replace
-  #  # <%= render :partial => "accounts/account", :locals => { :account => @account } %>
-  #  <%= render(@account) %>
+  #  # @account.to_partial_path returns 'accounts/account', so it can be used to replace:
+  #  # <%= render :partial => "accounts/account", :locals => { :account => @account} %>
+  #  <%= render @account %>
   #
-  #  # @posts is an array of Post instances, so it uses the RecordIdentifier to replace
+  #  # @posts is an array of Post instances, so every post record returns 'posts/post' on `to_partial_path`,
+  #  # that's why we can replace:
   #  # <%= render :partial => "posts/post", :collection => @posts %>
-  #  <%= render(@posts) %>
+  #  <%= render @posts %>
   #
   # == Rendering partials with layouts
   #
@@ -297,7 +300,6 @@ module ActionView
                                 "and is followed by any combinations of letters, numbers, or underscores.")
       end
 
-      extract_format(@path, @details)
       self
     end
 
@@ -366,13 +368,7 @@ module ActionView
       path = if object.respond_to?(:to_partial_path)
         object.to_partial_path
       else
-        klass = object.class
-        if klass.respond_to?(:model_name)
-          ActiveSupport::Deprecation.warn "ActiveModel-compatible objects whose classes return a #model_name that responds to #partial_path are deprecated. Please respond to #to_partial_path directly instead."
-          klass.model_name.partial_path
-        else
-          raise ArgumentError.new("'#{object.inspect}' is not an ActiveModel-compatible object that returns a valid partial path.")
-        end
+        raise ArgumentError.new("'#{object.inspect}' is not an ActiveModel-compatible object. It must implement :to_partial_path.")
       end
 
       @partial_names[path] ||= merge_prefix_into_object_path(@context_prefix, path.dup)

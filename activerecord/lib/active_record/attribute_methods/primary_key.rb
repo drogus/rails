@@ -30,10 +30,10 @@ module ActiveRecord
 
           if attr_name == primary_key && attr_name != 'id'
             generated_attribute_methods.send(:alias_method, :id, primary_key)
-            generated_attribute_methods.module_eval <<-CODE, __FILE__, __LINE__
-              def self.attribute_id(v, attributes, attributes_cache, attr_name)
+            generated_external_attribute_methods.module_eval <<-CODE, __FILE__, __LINE__
+              def id(v, attributes, attributes_cache, attr_name)
                 attr_name = '#{primary_key}'
-                send(:'attribute_#{attr_name}', attributes[attr_name], attributes, attributes_cache, attr_name)
+                send(attr_name, attributes[attr_name], attributes, attributes_cache, attr_name)
               end
             CODE
           end
@@ -72,8 +72,8 @@ module ActiveRecord
           when :table_name_with_underscore
             base_name.foreign_key
           else
-            if ActiveRecord::Base != self && connection.table_exists?(table_name)
-              connection.primary_key(table_name)
+            if ActiveRecord::Base != self && table_exists?
+              connection.schema_cache.primary_keys[table_name]
             else
               'id'
             end

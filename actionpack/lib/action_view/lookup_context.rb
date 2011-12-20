@@ -44,7 +44,7 @@ module ActionView
     module Accessors #:nodoc:
     end
 
-    register_detail(:locale)  { [I18n.locale, I18n.default_locale] }
+    register_detail(:locale)  { [I18n.locale, I18n.default_locale].uniq }
     register_detail(:formats) { Mime::SET.symbols }
     register_detail(:handlers){ Template::Handlers.extensions }
 
@@ -56,7 +56,11 @@ module ActionView
       @details_keys = Hash.new
 
       def self.get(details)
-        @details_keys[details.freeze] ||= new
+        @details_keys[details] ||= new
+      end
+
+      def self.clear
+        @details_keys.clear
       end
 
       def initialize
@@ -85,9 +89,9 @@ module ActionView
     protected
 
       def _set_detail(key, value)
+        @details = @details.dup if @details_key
         @details_key = nil
-        @details = @details.dup if @details.frozen?
-        @details[key] = value.freeze
+        @details[key] = value
       end
     end
 
@@ -147,14 +151,8 @@ module ActionView
       # as well as incorrectly putting part of the path in the template
       # name instead of the prefix.
       def normalize_name(name, prefixes) #:nodoc:
-        name  = name.to_s.sub(handlers_regexp) do |match|
-          ActiveSupport::Deprecation.warn "Passing a template handler in the template name is deprecated. " \
-            "You can simply remove the handler name or pass render :handlers => [:#{match[1..-1]}] instead.", caller
-          ""
-        end
-
         prefixes = nil if prefixes.blank?
-        parts    = name.split('/')
+        parts    = name.to_s.split('/')
         name     = parts.pop
 
         return name, prefixes || [""] if parts.empty?
@@ -163,10 +161,6 @@ module ActionView
         prefixes = prefixes ? prefixes.map { |p| "#{p}/#{parts}" } : [parts]
 
         return name, prefixes
-      end
-
-      def handlers_regexp #:nodoc:
-        @@handlers_regexp ||= /\.(?:#{default_handlers.join('|')})$/
       end
     end
 
