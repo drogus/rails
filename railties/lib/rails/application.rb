@@ -242,6 +242,7 @@ module Rails
         middleware.use ::Rack::Lock unless config.allow_concurrency
         middleware.use ::Rack::Runtime
         middleware.use ::Rack::MethodOverride
+        middleware.use ::ActionDispatch::OriginalPath
         middleware.use ::ActionDispatch::RequestId
         middleware.use ::Rails::Rack::Logger, config.log_tags # must come after Rack::MethodOverride to properly log overridden methods
         middleware.use ::ActionDispatch::ShowExceptions, config.exceptions_app || ActionDispatch::PublicExceptions.new(Rails.public_path)
