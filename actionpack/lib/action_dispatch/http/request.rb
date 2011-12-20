@@ -122,8 +122,16 @@ module ActionDispatch
       Http::Headers.new(@env)
     end
 
+    def original_path
+      @original_path ||= env["ORIGINAL_PATH"]
+    end
+
     def fullpath
       @fullpath ||= super
+    end
+
+    def original_url
+      base_url + original_path
     end
 
     def media_type
