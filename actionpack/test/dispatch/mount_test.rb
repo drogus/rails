@@ -5,6 +5,16 @@ class TestRoutingMount < ActionDispatch::IntegrationTest
 
   class FakeEngine
     def self.routes
+      Object.new
+    end
+
+    def self.call(env)
+      [200, {"Content-Type" => "text/html"}, ["OK"]]
+    end
+  end
+
+  class AppWithRoutes
+    def self.routes
       @routes ||= ActionDispatch::Routing::RouteSet.new
     end
 
@@ -29,7 +39,7 @@ class TestRoutingMount < ActionDispatch::IntegrationTest
     end
 
     resources :users do
-      mount FakeEngine, :at => "/fakeengine", :as => :fake_mounted_at_resource
+      mount AppWithRoutes, :at => "/appwithroutes", :as => :app_with_routes_mounted_at_resource
     end
 
     mount SprocketsApp, :at => "/", :via => :get
@@ -41,9 +51,9 @@ class TestRoutingMount < ActionDispatch::IntegrationTest
   end
 
   def test_app_name_is_properly_generated_when_engine_is_mounted_in_resources
-    assert Router.mounted_helpers.method_defined?(:user_fake_mounted_at_resource),
+    assert Router.mounted_helpers.method_defined?(:user_app_with_routes_mounted_at_resource),
           "A mounted helper should be defined with a parent's prefix"
-    assert Router.named_routes.routes[:user_fake_mounted_at_resource],
+    assert Router.named_routes.routes[:user_app_with_routes_mounted_at_resource],
           "A named route should be defined with a parent's prefix"
   end
 
@@ -81,6 +91,7 @@ class TestRoutingMount < ActionDispatch::IntegrationTest
   end
 
   def test_with_fake_engine_does_not_call_invalid_method
+    assert !FakeEngine.routes.respond_to?(:define_mounted_helper)
     get "/fakeengine"
     assert_equal "OK", response.body
   end
