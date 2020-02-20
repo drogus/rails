@@ -103,6 +103,32 @@ class HasOneThroughAssociationsTest < ActiveRecord::TestCase
     assert_equal club.id, member.current_membership.club_id
   end
 
+
+def test_foo
+  club = Club.new(name: "Da Club")
+  membership = CurrentMembership.new(club: club)
+  member = Member.new(name: "Sean Griffin")
+  member.current_membership = membership
+
+  p [:membership, membership]
+  p [:club_membership, club.membership]
+  p [:club_memberships, club.memberships.to_a]
+  p [:member_membership, member.current_membership]
+
+  p [:membership, membership]
+  p [:club_membership, club.membership]
+  p [:club_memberships, club.memberships.to_a]
+  p [:club_members, club.members]
+  p [:member_membership, member.current_membership]
+  #member.current_membership = membership
+
+  club.memberships << membership
+
+  club.save
+
+  assert_equal club, member.club
+end
+
   def test_replace_target_record
     new_club = Club.create(name: "Marx Bros")
     @member.club = new_club

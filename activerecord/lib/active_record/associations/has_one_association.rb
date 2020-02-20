@@ -65,6 +65,16 @@ module ActiveRecord
           end
 
           self.target = record
+          reflection = self.reflection.active_record.reflections.values.find { |r| r.through_reflection? && r.through_reflection.name == self.reflection.name }
+          if reflection
+            through = record.send(reflection.name)
+
+            #p record.send(reflection.name)
+            #p owner.send(reflection.name)
+            owner.send("#{reflection.name}=", record.send(reflection.name))
+            #p owner.send(reflection.name)
+          end
+
         end
 
         # The reason that the save param for replace is false, if for create (not just build),
